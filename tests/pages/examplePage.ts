@@ -5,6 +5,7 @@ export class ExamplePage {
   readonly title: Locator;
 
   readonly aboutUsLink: Locator;
+  readonly ourCentersLink: Locator;
   readonly logoutButton: Locator;
 
 
@@ -13,6 +14,7 @@ export class ExamplePage {
     this.title = page.locator('h1');
 
     this.aboutUsLink = page.getByRole('link', { name: /about us/i });
+    this.ourCentersLink = page.getByRole('link', { name: /our centers/i });
     this.logoutButton = page.getByRole('button', { name: /logout/i });
   }
 /**
@@ -25,6 +27,10 @@ export class ExamplePage {
 
   async navigateToAboutUs() {
     await this.aboutUsLink.click();
+  }
+
+  async navigateToOurCenters() {
+    await this.ourCentersLink.click();
   }
 
   async logout() {
