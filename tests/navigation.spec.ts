@@ -55,3 +55,31 @@ test('navigate to summary page and check title via page object', async ({ page }
   await summary.goto();
   await expect(summary.title).toHaveText(/Example Domain/);
 });
+
+test('logout via page object', async ({ page }) => {
+  test.skip(
+    !process.env.PLAYWRIGHT_LOGIN_URL ||
+      !process.env.PLAYWRIGHT_LOGIN_USER ||
+      !process.env.PLAYWRIGHT_LOGIN_PASS,
+    'Requires configured login credentials',
+  );
+
+  const example = new ExamplePage(page);
+  await expect(example.logoutButton).toBeVisible();
+  await example.logout();
+  await expect(example.logoutButton).toBeHidden();
+});
+
+test('navigate to Our Centers via page object', async ({ page }) => {
+  test.skip(
+    !process.env.PLAYWRIGHT_LOGIN_URL ||
+      !process.env.PLAYWRIGHT_LOGIN_USER ||
+      !process.env.PLAYWRIGHT_LOGIN_PASS,
+    'Requires configured login credentials',
+  );
+
+  const example = new ExamplePage(page);
+  await expect(example.ourCentersLink).toBeVisible();
+  await example.navigateToOurCenters();
+  await expect(page.getByRole('heading', { name: /our centers/i })).toBeVisible();
+});
