@@ -8,7 +8,9 @@ export class ExamplePage {
     this.page = page;
     this.title = page.locator('h1');
   }
-
+/**
+   * Navigates to the example.com page
+   */
   async goto() {
     await this.page.goto('https://example.com');
   }
