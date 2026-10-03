@@ -1,0 +1,82 @@
+
+  - testCaseId: TC001
+    testName: Valid Login
+    module: Login
+    priority: High
+    enabled: true
+    parameters:
+      username: "testuser0tryurtutu1"
+      password: "werewrwrw"
+      expectedResult: "Login successful"
+
+  - testCaseId: TC002
+    testName: Invalid Username
+    module: Login
+    priority: High
+    enabled: true
+    parameters:
+      username: "invawerwrliduser"
+      password: "qwerewrtewtr"
+      expectedResult: "Invalid username or password"
+
+
+      
+  - testCaseId: TC021
+    testName: Forgot Password
+    module: Login
+    priority: High
+    enabled: true
+    parameters:
+      username: "testuser01"
+      email: "testuser01@example.com"
+      expectedResult: "Password reset link sent"
+
+  - testCaseId: TC022
+    testName: User Registration
+    module: Registration
+    priority: High
+    enabled: true
+    parameters:
+      firstName: "John"
+      lastName: "Smith"
+      username: "johnsmith01"
+      email: "johnsmith01@example.com"
+      password: "Test@123"
+      confirmPassword: "Test@123"
+      expectedResult: "Registration successful"
+
+  - testCaseId: TC023
+    testName: Invalid Email Registration
+    module: Registration
+    priority: Medium
+    enabled: true
+    parameters:
+      firstName: "John"
+      lastName: "Smith"
+      username: "johnsmith02"
+      email: "johnsmith"
+      password: "Test@123"
+      confirmPassword: "Test@123"
+      expectedResult: "Invalid email address"
+
+  - testCaseId: TC024
+    testName: Change Password
+    module: Account
+    priority: High
+    enabled: true
+    parameters:
+      username: "testuser01"
+      currentPassword: "Test@123"
+      newPassword: "NewTest@456"
+      confirmPassword: "NewTest@456"
+      expectedResult: "Password changed successfully"
+
+  - testCaseId: TC025
+    testName: Logout User
+    module: Account
+    priority: High
+    enabled: true
+    parameters:
+      username: "testuser01"
+      sessionTimeout: 300
+      expectedResult: "User logged out successfully"
