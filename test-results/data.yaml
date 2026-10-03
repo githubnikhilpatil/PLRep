@@ -1,5 +1,6 @@
 
-  - testCaseId: TC001
+testScenarios:
+ - testCaseId: TC001
     testName: Valid Login
     module: Login
     priority: High
@@ -19,7 +20,6 @@
       password: "qwerewrtewtr"
       expectedResult: "Invalid username or password"
 
-
       
   - testCaseId: TC021
     testName: Forgot Password
@@ -34,11 +34,118 @@
   - testCaseId: TC022
     testName: User Registration
     module: Registration
+
+      password: "Wrong@123"
+      expectedResult: "Invalid username or password"
+
+  - testCaseId: TC004
+    testName: Empty Username
+    module: Login
+    priority: Medium
+    enabled: true
+    parameters:
+      username: ""
+      password: "Test@123"
+      expectedResult: "Username is required"
+
+  - testCaseId: TC005
+    testName: Empty Password
+    module: Login
+    priority: Medium
+    enabled: true
+    parameters:
+      username: "testuser01"
+      password: ""
+      expectedResult: "Password is required"
+
+  - testCaseId: TC006
+    testName: Valid Product Search
+    module: Product
+    priority: High
+    enabled: true
+    parameters:
+      searchText: "Laptop"
+      category: "Electronics"
+      expectedResult: "Products displayed"
+
+  - testCaseId: TC007
+    testName: Product Search With No Results
+    module: Product
+    priority: Medium
+    enabled: true
+    parameters:
+      searchText: "XYZ123456"
+      category: "Electronics"
+      expectedResult: "No products found"
+
+  - testCaseId: TC008
+    testName: Filter Products By Price
+    module: Product
+    priority: Medium
+    enabled: true
+    parameters:
+      category: "Electronics"
+      minPrice: 500
+      maxPrice: 2000
+      expectedResult: "Products within price range displayed"
+
+  - testCaseId: TC009
+    testName: Add Product To Cart
+    module: Shopping Cart
+    priority: High
+    enabled: true
+    parameters:
+      productName: "Laptop"
+      quantity: 1
+      expectedPrice: 1200
+      expectedResult: "Product added to cart"
+
+  - testCaseId: TC010
+    testName: Add Multiple Products To Cart
+    module: Shopping Cart
+    priority: High
+    enabled: true
+    parameters:
+      products:
+        - productName: "Laptop"
+          quantity: 1
+        - productName: "Mouse"
+          quantity: 2
+        - productName: "Keyboard"
+          quantity: 1
+      expectedResult: "All products added to cart"
+
+  - testCaseId: TC011
+    testName: Update Cart Quantity
+    module: Shopping Cart
+    priority: Medium
+    enabled: true
+    parameters:
+      productName: "Laptop"
+      oldQuantity: 1
+      newQuantity: 3
+      expectedResult: "Cart quantity updated"
+
+  - testCaseId: TC012
+    testName: Remove Product From Cart
+    module: Shopping Cart
+    priority: Medium
+    enabled: true
+    parameters:
+      productName: "Mouse"
+      quantity: 1
+      expectedResult: "Product removed from cart"
+
+  - testCaseId: TC013
+    testName: Valid Shipping Address
+    module: Checkout
+
     priority: High
     enabled: true
     parameters:
       firstName: "John"
       lastName: "Smith"
+
       username: "johnsmith01"
       email: "johnsmith01@example.com"
       password: "Test@123"
@@ -48,11 +155,24 @@
   - testCaseId: TC023
     testName: Invalid Email Registration
     module: Registration
+
+      address: "123 Main Street"
+      city: "New York"
+      state: "NY"
+      zipCode: "10001"
+      country: "USA"
+      expectedResult: "Shipping address accepted"
+
+  - testCaseId: TC014
+    testName: Invalid Shipping Address
+    module: Checkout
+
     priority: Medium
     enabled: true
     parameters:
       firstName: "John"
       lastName: "Smith"
+
       username: "johnsmith02"
       email: "johnsmith"
       password: "Test@123"
@@ -80,3 +200,82 @@
       username: "testuser01"
       sessionTimeout: 300
       expectedResult: "User logged out successfully"
+      address: ""
+      city: "New York"
+      state: "NY"
+      zipCode: "10001"
+      country: "USA"
+      expectedResult: "Address is required"
+
+  - testCaseId: TC015
+    testName: Apply Valid Coupon
+    module: Checkout
+    priority: High
+    enabled: true
+    parameters:
+      couponCode: "SAVE20"
+      orderAmount: 1000
+      expectedDiscount: 200
+      expectedResult: "Coupon applied successfully"
+
+  - testCaseId: TC016
+    testName: Apply Invalid Coupon
+    module: Checkout
+    priority: Medium
+    enabled: true
+    parameters:
+      couponCode: "INVALID123"
+      orderAmount: 1000
+      expectedDiscount: 0
+      expectedResult: "Invalid coupon code"
+
+  - testCaseId: TC017
+    testName: Credit Card Payment
+    module: Payment
+    priority: Critical
+    enabled: true
+    parameters:
+      paymentMethod: "Credit Card"
+      cardNumber: "4111111111111111"
+      expiryDate: "12/30"
+      cvv: "123"
+      amount: 1000
+      expectedResult: "Payment successful"
+
+  - testCaseId: TC018
+    testName: Failed Credit Card Payment
+    module: Payment
+    priority: Critical
+    enabled: true
+    parameters:
+      paymentMethod: "Credit Card"
+      cardNumber: "4000000000000002"
+      expiryDate: "12/30"
+      cvv: "123"
+      amount: 1000
+      expectedResult: "Payment failed"
+
+  - testCaseId: TC019
+    testName: Place Order Using COD
+    module: Order
+    priority: High
+    enabled: true
+    parameters:
+      paymentMethod: "Cash On Delivery"
+      productName: "Laptop"
+      quantity: 1
+      shippingMethod: "Standard"
+      expectedOrderStatus: "Order placed"
+      expectedPaymentStatus: "Pending"
+
+  - testCaseId: TC020
+    testName: Cancel Order
+    module: Order
+    priority: Medium
+    enabled: true
+    parameters:
+      orderId: "ORD12345"
+      cancellationReason: "Customer changed mind"
+      expectedOrderStatus: "Cancelled"
+      expectedResult: "Order cancelled successfully"
+
