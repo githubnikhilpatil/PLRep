@@ -40,7 +40,7 @@ test.afterEach(async ({ page }) => {
       await logoutLink.first().click();
     }
   } catch {
-    // Ignore cleanup failures so tests don't fail during teardown.
+    // Ignore cleanup failures so tests don't fail during teardown1.
   }
 });
 
