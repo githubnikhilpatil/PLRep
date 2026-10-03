@@ -16,7 +16,7 @@ export class ExamplePage {
     this.logoutButton = page.getByRole('button', { name: /logout/i });
   }
 /**
-   * Navigates to New Configured Url
+   * Navigates to New Configured Url completely new 
    */
   async goto() {
     await this.page.goto('https://example.com');
