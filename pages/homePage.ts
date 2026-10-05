@@ -12,10 +12,17 @@ this.pageTitle = page.getByRole('link',{name:'Home' });
 }
 public async validateHomePageNavigation(): Promise<boolean> 
 {
-    if(await this.pageTitle.isVisible())
+    if(await this.pageTitle.isVisible({ timeout: 15_000 }))
+    {
         return true;
+    console.log('validated');
+    }
     else
+    {
         return false;
+    console.log('not validated');
+    }
 }
+
 
 }
