@@ -1,7 +1,5 @@
 import { test } from '../../fixtures/testHooks';
 import { expect } from '@playwright/test';
-import { ExamplePage } from '../../pages/examplePage';
-import { SummaryPage } from '../../pages/summaryPage';
 import { LoginPage } from '../../pages/Loginpage';
 import { HomePage } from '../../pages/homePage';
 import { env } from '../../config/env';
