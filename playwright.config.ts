@@ -6,9 +6,18 @@ export default defineConfig({
   expect: { timeout: 5_000 },
   fullyParallel: true,
   retries: 0,
-  reporter: [['list']],
+   reporter: [
+    ['html', { outputFolder: 'playwright-report', open: 'never' }],
+
+    [
+      'allure-playwright',
+      {
+        resultsDir: 'allure-results'
+      }
+    ]
+  ],
   use: {
-    headless: true,
+    headless: false,
     viewport: { width: 1280, height: 720 },
     actionTimeout: 0,
     trace: 'on-first-retry',

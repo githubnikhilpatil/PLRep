@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { ExamplePage } from './pages/examplePage';
 import { SummaryPage } from './pages/summaryPage';
+import { LoginPage } from './pages/Loginpage';
+import { HomePage } from './pages/homePage';
 
 test.beforeEach(async ({ page }) => {
   const loginUrl = process.env.PLAYWRIGHT_LOGIN_URL;
@@ -83,3 +85,24 @@ test('navigate to Our Centers via page object', async ({ page }) => {
   await example.navigateToOurCenters();
   await expect(page.getByRole('heading', { name: /our centers/i })).toBeVisible();
 });
+
+test('Login to CRM',async({page}) =>
+{
+await page.goto('https://ui.freecrm.com/login');
+await page.waitForLoadState('networkidle');
+const loginPage = new LoginPage(page);
+const username = "nikhilpatil222@yahoo.com";
+const password = "Nokia@500";
+await loginPage.login(username, password);
+const homePage =  new HomePage(page);
+await page.waitForLoadState('networkidle');
+if( await homePage.validateHomePageNavigation())
+{
+console.log("Login Successful");
+}else
+{
+console.log("Login Failed");
+}
+
+}
+);
