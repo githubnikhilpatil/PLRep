@@ -64,4 +64,24 @@ export class AllureHelper {
             allure.Status.PASSED
         );
     }
+
+    // Allure Feature
+    static async feature(name: string): Promise<void> {
+        await allure.feature(name);
+    }
+
+    // Allure Story
+    static async story(name: string): Promise<void> {
+        await allure.story(name);
+    }
+
+    // Allure Epic
+    static async epic(name: string): Promise<void> {
+        await allure.epic(name);
+    }
+
+    // Allure Tags
+    static async tags(...tags: string[]): Promise<void> {
+        await allure.tags(...tags);
+    }
 }
