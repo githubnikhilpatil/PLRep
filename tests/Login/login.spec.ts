@@ -1,25 +1,13 @@
 import { test } from '../../fixtures/testHooks';
 import { expect } from '@playwright/test';
-import { LoginPage } from '../../pages/Loginpage';
-import { HomePage } from '../../pages/homePage';
+import { LoginPage } from '../../pages/LoginPage';
+import { HomePage } from '../../pages/HomePage';
 import { env } from '../../config/env';
 import { chromium, firefox,Browser, BrowserContext } from '@playwright/test';
 import { AllureHelper } from '../../utils/AllureHelper';
 
 test('Login to CRM @Login',async({page}) =>
 {
-
-     await AllureHelper.epic('CRM Application');
-
-    await AllureHelper.feature('Customer Management');
-
-    await AllureHelper.story('Create Customer');
-
-    await AllureHelper.tags(
-        'customer',
-        'create-customer',
-        'regression'
-    );  
 await AllureHelper.info(page,'navingating to Login page', 'Successful',true);
 await page.goto(env.App_URL);
 await page.waitForLoadState('networkidle');
