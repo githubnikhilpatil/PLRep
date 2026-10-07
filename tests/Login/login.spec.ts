@@ -30,3 +30,28 @@ else
 }
 }
 );
+
+
+
+test('Create New Customer @Customer',async({page}) =>
+{
+await AllureHelper.info(page,'navingating to Login page', 'Successful',true);
+await page.goto(env.App_URL);
+await page.waitForLoadState('networkidle');
+const loginPage = new LoginPage(page);
+const username = env.username;
+const password = env.password;
+await page.waitForTimeout(5000);
+await loginPage.login(username, password);
+const homePage =  new HomePage(page);
+await page.waitForLoadState('networkidle');
+await AllureHelper.info(page,'navingating to Home page', 'Successful',true);
+await page.waitForTimeout(5000);
+
+
+
+
+
+}
+
+);
