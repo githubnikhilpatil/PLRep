@@ -10,7 +10,9 @@ import { TestDataReader }  from '../../utils/TestDataReader';
 import { ContactDataMapper } from '../../data-mapper/ContactDataMapper';
 
 
-test('Login to CRM @Login',async({page}) =>
+test('Login to CRM ',{
+        tag: ['@TC0011']
+    },async({page}) =>
 {
    await AllureHelper.epic('CRM Application');
 
@@ -68,8 +70,6 @@ await AllureHelper.tags(
      const contact =
          ContactDataMapper.createContact(data);
     console.log('final contact data' ,contact ) ;
-    
-    await page.pause();
 
 await AllureHelper.info(page,'navingating to Login page', 'Successful',true);
 await page.goto(env.App_URL);
@@ -101,7 +101,9 @@ await AllureHelper.info(page,'New contact is not created', 'Fail',true);
 
 );
 
-test('Delete Created New Contact @Contact',async({page}) =>
+test('Delete Created New Contact', {
+        tag: ['@TC0002']
+    },async({page}) =>
 {
 await AllureHelper.epic('CRM Application');
 await AllureHelper.feature('Contacts');
@@ -110,7 +112,13 @@ await AllureHelper.tags(
         'Contact',
         'delete-Contact',
         'regression'
-    );    
+    ); 
+  const data =
+         TestDataReader.getData('TC0002');
+
+     const contact =
+         ContactDataMapper.createContact(data);
+    console.log('final contact data' ,contact ) ;      
 await AllureHelper.info(page,'navingating to Login page', 'Successful',true);
 await page.goto(env.App_URL);
 await page.waitForLoadState('networkidle');
@@ -128,7 +136,7 @@ if (await homePage.Contacts.isVisible()) {
 }
 const contactPage = new ContactPage(page);
 
-const result = await contactPage.Create_New_Contact();
+const result = await contactPage.Create_New_Contact(contact);
 
 if ( result.success)
 {
