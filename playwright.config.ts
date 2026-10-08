@@ -19,6 +19,7 @@ export default defineConfig({
   fullyParallel: true,
   workers: 8,
   retries: 0,
+  globalSetup: './global-setup.ts',
 //globalTeardown: './global-teardown.ts',
     reporter: [
         [ 'allure-playwright',

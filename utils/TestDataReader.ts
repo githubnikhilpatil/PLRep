@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx';
 import path from 'path';
+import fs from 'fs';
 import { env } from '../config/env';
 
 export interface TestData {
@@ -8,54 +9,51 @@ export interface TestData {
 
 export class TestDataReader {
 
-    private static workbook: XLSX.WorkBook;
-
-    public static load(): void {
-
-        const filePath = path.resolve(
-            process.cwd(),
-            'test-data',
-            env.environment.toUpperCase(),
-            'TestData.xlsx'
-        );
-
-        this.workbook = XLSX.readFile(filePath);
-
-        console.log(`Test data loaded from: ${filePath}`);
-    }
+    private static data: Record<string, TestData[]> | null = null;
 
     public static getData(tcId: string): TestData {
 
-        if (!this.workbook) {
-            this.load();
-        }
+        this.initialize();
 
-        const sheetName = 'Contacts';
+        for (const sheetName of Object.keys(this.data!)) {
 
-        const worksheet =
-            this.workbook.Sheets[sheetName];
+            const rows = this.data![sheetName];
 
-        if (!worksheet) {
-            throw new Error(
-                `Sheet '${sheetName}' not found`
+            const data = rows.find(
+                row => String(row.TestCaseID) === tcId
             );
+
+            if (data) {
+                return data;
+            }
         }
 
-        const rows: TestData[] =
-            XLSX.utils.sheet_to_json(worksheet);
-
-        console.log(rows);
-
-        const data = rows.find(
-            row => String(row.TestCaseID) === tcId
+        throw new Error(
+            `Test case '${tcId}' not found in test data`
         );
-        console.log(data);
-        if (!data) {
+    }
+
+    private static initialize(): void {
+
+        if (this.data) {
+            return;
+        }
+
+        const cacheFile = path.resolve(
+            process.cwd(),
+            '.test-data-cache',
+            `${env.environment}.json`
+        );
+
+        if (!fs.existsSync(cacheFile)) {
+
             throw new Error(
-                `Test case '${tcId}' not found in ${sheetName} sheet`
+                `Test data cache not found: ${cacheFile}`
             );
         }
 
-        return data;
+        this.data = JSON.parse(
+            fs.readFileSync(cacheFile, 'utf-8')
+        );
     }
 }
