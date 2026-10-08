@@ -1,4 +1,15 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig,devices  } from '@playwright/test';
+import path from 'path';
+import { createExecutionFolder } from './utils/ExecutionFolder';
+
+const executionFolder = createExecutionFolder();
+
+process.env.ALLURE_EXECUTION_FOLDER = executionFolder;
+
+const allureResultsFolder = path.join(
+    executionFolder,
+    'temp-results'
+);
 
 export default defineConfig({
   testDir: './tests',
@@ -6,11 +17,13 @@ export default defineConfig({
   timeout: 30_000,
   expect: { timeout: 5_000 },
   fullyParallel: true,
+  workers: 8,
   retries: 0,
+//globalTeardown: './global-teardown.ts',
     reporter: [
         [ 'allure-playwright',
             {
-                resultsDir: 'allure-results',
+               resultsDir: 'allure-results',
                 detail: false
             }]
     ],

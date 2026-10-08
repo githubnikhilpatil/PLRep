@@ -1,80 +1,61 @@
 import * as XLSX from 'xlsx';
 import path from 'path';
+import { env } from '../config/env';
 
 export interface TestData {
-    TestCase: string;
-    Scenario: string;
-    [key: string]: string;
+    [key: string]: any;
 }
 
 export class TestDataReader {
 
-    private workbook: XLSX.WorkBook;
+    private static workbook: XLSX.WorkBook;
 
-    constructor(fileName: string = 'TestData.xlsx') {
+    public static load(): void {
 
         const filePath = path.resolve(
             process.cwd(),
             'test-data',
-            fileName
+            env.environment.toUpperCase(),
+            'TestData.xlsx'
         );
 
         this.workbook = XLSX.readFile(filePath);
+
+        console.log(`Test data loaded from: ${filePath}`);
     }
 
-    /**
-     * Returns all parameters and values
-     * for a specific TestCase.
-     */
-    public getTestData(
-        sheetName: string,
-        testCase: string
-    ): TestData {
+    public static getData(tcId: string): TestData {
 
-        const worksheet = this.workbook.Sheets[sheetName];
+        if (!this.workbook) {
+            this.load();
+        }
+
+        const sheetName = 'Contacts';
+
+        const worksheet =
+            this.workbook.Sheets[sheetName];
 
         if (!worksheet) {
             throw new Error(
-                `Excel sheet '${sheetName}' not found`
+                `Sheet '${sheetName}' not found`
             );
         }
 
-        const rows = XLSX.utils.sheet_to_json<{
-            TestCase: string;
-            Scenario: string;
-            Parameter: string;
-            Value: string | number;
-        }>(
-            worksheet,
-            {
-                defval: ''
-            }
-        );
+        const rows: TestData[] =
+            XLSX.utils.sheet_to_json(worksheet);
 
-        const testRows = rows.filter(
-            row => row.TestCase === testCase
-        );
+        console.log(rows);
 
-        if (testRows.length === 0) {
+        const data = rows.find(
+            row => String(row.TestCaseID) === tcId
+        );
+        console.log(data);
+        if (!data) {
             throw new Error(
-                `TestCase '${testCase}' not found in sheet '${sheetName}'`
+                `Test case '${tcId}' not found in ${sheetName} sheet`
             );
         }
 
-        const testData: TestData = {
-            TestCase: testCase,
-            Scenario: testRows[0].Scenario
-        };
-
-        for (const row of testRows) {
-
-            if (!row.Parameter) {
-                continue;
-            }
-
-            testData[row.Parameter] = String(row.Value);
-        }
-
-        return testData;
+        return data;
     }
 }

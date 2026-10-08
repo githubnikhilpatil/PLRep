@@ -46,8 +46,8 @@ export const test = base.extend<MyFixtures>({
 
         const context: BrowserContext = await browser.newContext({
             viewport: {
-                width: 1920,
-                height: 1080
+                width: 1280,
+                height: 720 
             }
         });
 
