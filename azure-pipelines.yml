@@ -1,17 +1,25 @@
-
 trigger:
-- main
+  - main
 
 pool:
-  vmImage: ubuntu-latest
+  name: 'Default'
+  demands:
+    - Agent.Name -equals AgentNikhil
+    - Agent.OS -equals Windows_NT
 
 steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '20.x'
-  displayName: 'Install Node.js'
+  - script: node --version
+    displayName: 'Check Node.js'
 
-- script: |
-    node --version
-    npm --version
-  displayName: 'Verify Node.js and npm'
+  - script: npm --version
+    displayName: 'Check npm'
+
+  - script: npm ci
+    displayName: 'Install dependencies'
+
+  - script: npx playwright install chromium
+    displayName: 'Install Playwright Chromium'
+
+  - script: npx playwright test
+    displayName: 'Run Playwright tests'
+
