@@ -21,5 +21,5 @@ steps:
     displayName: 'Install Playwright Chromium'
 
   - script: npx playwright test
-    displayName: 'Run Playwright tests'
+    displayName: 'npx playwright test --grep "@TC0011"'
 
