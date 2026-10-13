@@ -1,5 +1,5 @@
 trigger:
-  - UserStory2
+  - main
 
 pool:
   name: 'Default'
