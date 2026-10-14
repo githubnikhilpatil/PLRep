@@ -12,7 +12,7 @@ import { ContactDataMapper } from '../../data-mapper/ContactDataMapper';
 import { DealDataMapper } from '../../data-mapper/DealDataMapper';
 import { GenericUtilityHelper  } from '../../utils/GenericUtilityHelper'
 
-test.skip('Login to CRM ',{
+test('Login to CRM ',{
         tag: ['@TC0011']
     },async({page}) =>
 {
