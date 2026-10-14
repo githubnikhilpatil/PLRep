@@ -18,6 +18,7 @@ parameters:
       - chromium
       - firefox
       - webkit
+      - edge
 
 schedules:
   - cron: "0 * * * *"
