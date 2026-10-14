@@ -24,7 +24,7 @@ steps:
                echo Playwright browser check completed.
                npx playwright install chromium firefox webkit
             )
-    displayName: 'Install Playwright Chromium'
+    displayName: 'Install Playwright Browsers'
 
   - script: npx playwright test --grep "@TC0011"
     displayName: 'npx playwright test --grep "@TC0011"'
