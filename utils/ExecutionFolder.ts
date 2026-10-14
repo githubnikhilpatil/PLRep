@@ -3,6 +3,24 @@ import path from 'path';
 let executionFolder: string;
 export function createExecutionFolder(): string {
 
+    const reportsFolder = path.resolve(
+        process.cwd(),
+        'AllureReports'
+    );
+
+    if (fs.existsSync(reportsFolder)) {
+        for (const entry of fs.readdirSync(reportsFolder, {
+            withFileTypes: true
+        })) {
+            if (entry.isDirectory()) {
+                fs.rmSync(path.join(reportsFolder, entry.name), {
+                    recursive: true,
+                    force: true
+                });
+            }
+        }
+    }
+
     const now = new Date();
 
     const dd = String(now.getDate()).padStart(2, '0');
@@ -15,11 +33,7 @@ export function createExecutionFolder(): string {
     const folderName =
         `AllureReport_${dd}${mm}${yyyy}_${hr}${min}`;
 
-    const folder = path.join(
-        process.cwd(),
-        'AllureReports',
-        folderName
-    );
+    const folder = path.join(reportsFolder, folderName);
 
     fs.mkdirSync(folder, {
         recursive: true
