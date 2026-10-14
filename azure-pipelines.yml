@@ -54,6 +54,9 @@ steps:
     displayName: 'Install Playwright Browsers'
 
   - script: npx playwright test --grep "@TC0011"
+    env:
+      ENV: $(environment)
+      BROWSER: ${{ parameters.browsers }}
     displayName: 'npx playwright test --grep "@TC0011"'
 
 
