@@ -20,6 +20,23 @@ parameters:
       - webkit
       - edge
 
+  - name: ExecutionType
+    displayName: Execution Type
+    type: string
+    default: Sanity
+    values:
+      - Sanity
+      - Regression
+
+  - name: Module
+    displayName: Regression Module
+    type: string
+    default: Customers
+    values:
+      - Customers
+      - Deals
+      - Orders
+
 schedules:
   - cron: "0 * * * *"
     displayName: "Run Every Hour"
@@ -53,5 +70,8 @@ steps:
       ENV: ${{parameters.environment }}
       BROWSER: ${{ parameters.browsers }}
     displayName: 'npx playwright test --grep "@TC0011"'
+
+
+
 
 
