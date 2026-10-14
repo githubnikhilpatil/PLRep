@@ -65,7 +65,7 @@ steps:
   - script: npx playwright install chromium firefox webkit
     displayName: 'Install Playwright Browsers'
 
-  - script: npx playwright test --grep "@TC0011"
+  - script: npx playwright test
     env:
       ENV: ${{parameters.environment }}
       BROWSER: ${{ parameters.browsers }}
