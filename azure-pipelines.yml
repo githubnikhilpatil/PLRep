@@ -72,6 +72,46 @@ steps:
       allure generate --help
     displayName: 'Verify Java and Allure'
         
+
+
+
+  - task: PowerShell@2
+    displayName: 'Fix Java and Allure PATH'
+    inputs:
+      targetType: inline
+      script: |
+        # Correct JAVA_HOME: remove the \bin suffix
+        $javaHome = 'C:\Program Files\Java\jdk1.8.0_202'
+        $javaExe = Join-Path $javaHome 'bin\java.exe'
+
+        if (!(Test-Path $javaExe)) {
+          throw "Java executable not found: $javaExe"
+        }
+
+        Write-Host "##vso[task.setvariable variable=JAVA_HOME]$javaHome"
+        Write-Host "##vso[task.prependpath]$javaHome\bin"
+
+        # Locate the project's locally installed Allure CLI
+        $allureCmd = Join-Path "$(Build.SourcesDirectory)" 'node_modules\.bin\allure.cmd'
+
+        if (!(Test-Path $allureCmd)) {
+          throw "Allure CLI not found at $allureCmd. Verify allure-commandline is installed."
+        }
+
+        Write-Host "##vso[task.prependpath]$(Build.SourcesDirectory)\node_modules\.bin"
+
+        & $javaExe -version
+        if ($LASTEXITCODE -ne 0) {
+          throw "Java verification failed."
+        }
+
+        & $allureCmd --version
+        if ($LASTEXITCODE -ne 0) {
+          throw "Allure CLI verification failed."
+        }
+      workingDirectory: '$(Build.SourcesDirectory)'
+
+
   - script: npx playwright test
     env:
       ENV: ${{ parameters.environment }}
