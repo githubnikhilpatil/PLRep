@@ -46,113 +46,27 @@ schedules:
     always: true
 
 
-
 pool:
   name: 'Default'
   demands:
     - Agent.Name -equals AgentNikhil
     - Agent.OS -equals Windows_NT
 
-    
-variables:
-  nodeVersion: '20.x'
-  # Change this if your JDK is installed in another location.
-  javaHomePath: 'C:\Program Files\Java\jdk1.8.0_202'
-
 steps:
-  # 1. Set up Node.js
-  - task: NodeTool@0
-    displayName: 'Set up Node.js'
-    inputs:
-      versionSpec: '$(nodeVersion)'
+  - script: node --version
+    displayName: 'Check Node.js'
 
-  # 2. Verify Node.js and npm
-  - task: PowerShell@2
-    displayName: 'Verify Node.js and npm'
-    inputs:
-      targetType: inline
-      script: |
-        node --version
-        npm --version
-            
-  # 3. Install project dependencies
-  - task: PowerShell@2
-    displayName: 'Install npm dependencies'
-    inputs:
-      targetType: inline
-      script: |
-        npm ci
-      workingDirectory: '$(Build.SourcesDirectory)'
+  - script: npm --version
+    displayName: 'Check npm'
 
-  # 4. Configure Java for Allure
-  - task: PowerShell@2
-    displayName: 'Configure Java for Allure'
-    inputs:
-      targetType: inline
-      script: |
-        $javaHome = '$(javaHomePath)'
-        $javaExe = Join-Path $javaHome 'bin\java.exe'
+  - script: npm ci
+    displayName: 'Install dependencies'
 
-        if (-not (Test-Path $javaExe)) {
-          throw "Java was not found at $javaExe. Update javaHomePath to the installed JDK root."
-        }
+  - script: npx playwright install chromium firefox webkit
+    displayName: 'Install Playwright Browsers'
 
-        Write-Host "##vso[task.setvariable variable=JAVA_HOME]$javaHome"
-        Write-Host "##vso[task.prependpath]$javaHome\bin"
-
-        Write-Host "JAVA_HOME: $javaHome"
-        & $javaExe -version
-
-  # 5. Install the selected Playwright browser.
-  # Playwright skips downloading browser revisions already installed.
-  - task: PowerShell@2
-    displayName: 'Install selected Playwright browser'
-    inputs:
-      targetType: inline
-      script: |
-        $browser = '${{ parameters.browsers }}'
-
-        switch ($browser) {
-          'chrome'   { $installBrowser = 'chromium' }
-          'msedge'   { $installBrowser = 'msedge' }
-          'firefox'  { $installBrowser = 'firefox' }
-          'webkit'   { $installBrowser = 'webkit' }
-          default    { throw "Unsupported browser: $browser" }
-        }
-
-        npx playwright install $installBrowser
-
-        if ($LASTEXITCODE -ne 0) {
-          throw "Playwright browser installation failed."
-        }
-      workingDirectory: '$(Build.SourcesDirectory)'
-
- # 6. Execute Playwright tests using the selected filters
-  - task: PowerShell@2
-    displayName: 'Run Playwright tests'
-    inputs:
-      targetType: inline
-      script: |
-        $executionType = '${{ parameters.ExecutionType }}'
-        $module = '${{ parameters.Module }}'
-
-        # Match both tags in the test title.
-        $grepPattern = "(?=.*@$executionType)(?=.*@$module)"
-
-        Write-Host "Environment: $env:ENV"
-        Write-Host "Browser: $env:BROWSER"
-        Write-Host "Execution Type: $executionType"
-        Write-Host "Module: $module"
-        Write-Host "Tag pattern: $grepPattern"
-
-        npx playwright test --grep "$grepPattern"
-
-        if ($LASTEXITCODE -ne 0) {
-          throw "Playwright test execution failed with exit code $LASTEXITCODE"
-        }
-      workingDirectory: '$(Build.SourcesDirectory)'
+  - script: npx playwright test
     env:
-      ENV: '${{ lower(parameters.environment) }}'
-      BROWSER: '${{ parameters.browsers }}'    
-
-
+      ENV: ${{parameters.environment }}
+      BROWSER: ${{ parameters.browsers }}
+    displayName: 'npx playwright test'
