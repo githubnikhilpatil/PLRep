@@ -69,9 +69,26 @@ steps:
     env:
       ENV: ${{parameters.environment }}
       BROWSER: ${{ parameters.browsers }}
-    displayName: 'npx playwright test --grep "@TC0011"'
+    displayName: 'npx playwright test'
 
 
+  - task: PowerShell@2
+    displayName: 'Zip Allure Report'
+    condition: always()
+    inputs:
+      targetType: inline
+      script: |
+        $reportFolder = 'C:\PLDemo\AllureReports'
+        $zipPath = "$(Build.ArtifactStagingDirectory)\AllureReport.zip"
 
+        Compress-Archive -Path "$reportFolder\*" -DestinationPath $zipPath -Force
+
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish Zipped Allure Report'
+    condition: always()
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)\AllureReport.zip'
+      artifact: 'AllureReport'
+      publishLocation: pipeline
 
 
