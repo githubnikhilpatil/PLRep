@@ -49,7 +49,7 @@ steps:
 
   - script: npx playwright test --grep "@TC0011"
     env:
-      ENV: $(parameters.environment)
+      ENV: ${{parameters.environment }}
       BROWSER: ${{ parameters.browsers }}
     displayName: 'npx playwright test --grep "@TC0011"'
 
