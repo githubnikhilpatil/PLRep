@@ -21,5 +21,6 @@ export const env = {
     environment,
     App_URL: process.env.CRM_URL!,
     username: process.env.CRM_USERNAME!,
-    password: process.env.CRM_PASSWORD!
+    password: process.env.CRM_PASSWORD!,
+    PASSWORD_ENCRYPTION_KEY : process.env.PASSWORD_ENCRYPTION_KEY!
 };

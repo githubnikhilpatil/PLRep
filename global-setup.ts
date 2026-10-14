@@ -16,6 +16,9 @@ async function globalSetup() {
         `Loading test data from: ${filePath}`
     );
 
+    console.log( 'BROWSER is' +process.env.BROWSER); 
+    console.log( 'ENV is' + env.environment.toUpperCase()); 
+
     if (!fs.existsSync(filePath)) {
         throw new Error(
             `Test data file not found: ${filePath}`

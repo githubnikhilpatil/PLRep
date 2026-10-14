@@ -1,5 +1,5 @@
 import { Page, Locator } from '@playwright/test';
-
+import {GenericUtilityHelper} from '../utils/GenericUtilityHelper';
 export class HomePage{
 
 readonly page: Page;
@@ -43,6 +43,8 @@ public async validateHomePageNavigation(): Promise<boolean>
 {
     if(await this.pageTitle1.isVisible({ timeout: 15_000 }))
     {
+   await GenericUtilityHelper.highlight(this.pageTitle1 );
+        
         return true;
     console.log('validated');
     }
