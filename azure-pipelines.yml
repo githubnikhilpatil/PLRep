@@ -72,10 +72,78 @@ steps:
       BROWSER: ${{ parameters.browsers }}
     displayName: 'npx playwright test'
 
-  - task: PublishPipelineArtifact@1
-    displayName: 'Publish Allure temp-results'
+# 7. ZIP only the latest execution's temp-results folder
+  - task: PowerShell@2
+    displayName: 'Zip Allure temp-results'
     condition: always()
     inputs:
-      targetPath: '$(Build.SourcesDirectory)\AllureReports'
+      targetType: inline
+      workingDirectory: '$(Build.SourcesDirectory)'
+      script: |
+        $reportRoot = "$(Build.SourcesDirectory)\AllureReports"
+        $stagingFolder = "$(Build.ArtifactStagingDirectory)"
+        $zipPath = Join-Path $stagingFolder "Allure-temp-results.zip"
+
+        # Prevent an old ZIP from being published.
+        Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
+
+        Write-Host "Searching for Allure results in: $reportRoot"
+
+        if (!(Test-Path $reportRoot)) {
+          Write-Host "##vso[task.logissue type=warning]AllureReports folder not found."
+          exit 0
+        }
+
+        $executionFolder = Get-ChildItem -Path $reportRoot -Directory |
+          Where-Object { $_.Name -like "AllureReport_*" } |
+          Sort-Object LastWriteTime -Descending |
+          Select-Object -First 1
+
+        if (!$executionFolder) {
+          Write-Host "##vso[task.logissue type=warning]No Allure execution folder found."
+          exit 0
+        }
+
+        $resultsFolder = Join-Path $executionFolder.FullName "temp-results"
+
+        Write-Host "Execution folder: $($executionFolder.FullName)"
+        Write-Host "Results folder: $resultsFolder"
+
+        if (!(Test-Path $resultsFolder)) {
+          Write-Host "##vso[task.logissue type=warning]temp-results folder not found."
+          exit 0
+        }
+
+        $resultFiles = @(
+          Get-ChildItem -Path $resultsFolder -File -Recurse
+        )
+
+        if ($resultFiles.Count -eq 0) {
+          Write-Host "##vso[task.logissue type=warning]temp-results folder is empty."
+          exit 0
+        }
+
+        New-Item -ItemType Directory -Path $stagingFolder -Force | Out-Null
+
+        Compress-Archive `
+          -Path "$resultsFolder\*" `
+          -DestinationPath $zipPath `
+          -Force
+
+        if (!(Test-Path $zipPath)) {
+          throw "ZIP file was not created: $zipPath"
+        }
+
+        Write-Host "ZIP created: $zipPath"
+        Write-Host "Files included: $($resultFiles.Count)"
+
+        Write-Host "##vso[task.setvariable variable=AllureZipCreated]true"
+
+  # 8. Publish ZIP as a downloadable Azure Pipeline Artifact
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish downloadable Allure results'
+    condition: and(always(), eq(variables['AllureZipCreated'], 'true'))
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)\Allure-temp-results.zip'
       artifact: 'Allure-temp-results'
-      publishLocation: 'pipeline'    
+      publishLocation: 'pipeline'
