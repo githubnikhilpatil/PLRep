@@ -1,6 +1,15 @@
 trigger:
   - main
 
+schedules:
+  - cron: "0 * * * *"
+    displayName: "Run Every Hour"
+    branches:
+      include:
+        - main
+    always: true
+
+
 pool:
   name: 'Default'
   demands:
@@ -28,4 +37,3 @@ steps:
 
   - script: npx playwright test --grep "@TC0011"
     displayName: 'npx playwright test --grep "@TC0011"'
-
