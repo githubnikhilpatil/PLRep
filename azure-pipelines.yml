@@ -66,18 +66,6 @@ steps:
     displayName: 'Install Playwright Browsers'
 
     
-  - powershell: |
-      $javaHome = "C:\Program Files\Java\jdk1.8.0_202"
-
-      if (!(Test-Path "$javaHome\bin\java.exe")) {
-        throw "Java not found at $javaHome. Update the path to your installed JDK."
-      }
-
-      Write-Host "##vso[task.setvariable variable=JAVA_HOME]$javaHome"
-      Write-Host "##vso[task.prependpath]$javaHome\bin"
-      & "$javaHome\bin\java.exe" -version
-    displayName: 'Fix JAVA_HOME for Allure'
-
   - script: npx playwright test
     env:
       ENV: ${{ parameters.environment }}
