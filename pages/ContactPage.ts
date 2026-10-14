@@ -62,7 +62,7 @@ if (await this.Create.isVisible()) {
     await this.page.getByText('Referred By', { exact: true })
         .locator('..').getByRole('button').click();
     const referredBy = contact?.referredBy ?? 'Sam';
-    await this.page.getByRole('textbox', { name: 'Search' }).fill(referredBy);
+    await this.page.getByRole('combobox', { name: 'Search' }).fill(referredBy);
     await this.page.getByRole('button', { name: referredBy }).nth(1).click();
 
 await this.Save.click();

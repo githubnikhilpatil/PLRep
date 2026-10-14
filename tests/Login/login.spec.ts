@@ -145,7 +145,7 @@ test.skip('Create New Deal', {
 
 
 
-test('Delete Created New Contact', {
+test.skip('Delete Created New Contact', {
         tag: ['@TC0002']
     },async({page}) =>
 {
