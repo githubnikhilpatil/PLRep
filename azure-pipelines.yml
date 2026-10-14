@@ -46,28 +46,23 @@ schedules:
     always: true
 
 
+
 pool:
   name: 'Default'
   demands:
     - Agent.Name -equals AgentNikhil
     - Agent.OS -equals Windows_NT
 
+    
+
 steps:
-  - script: node --version
-    displayName: 'Check Node.js'
+  # 1. Set up Node.js
+  - task: NodeTool@0
+    displayName: 'Set up Node.js'
+    inputs:
+      versionSpec: '$(nodeVersion)'
 
-  - script: npm --version
-    displayName: 'Check npm'
+    
 
-  - script: npm ci
-    displayName: 'Install dependencies'
 
-  - script: npx playwright install chromium firefox webkit
-    displayName: 'Install Playwright Browsers'
-
-  - script: npx playwright test
-    env:
-      ENV: ${{parameters.environment }}
-      BROWSER: ${{ parameters.browsers }}
-    displayName: 'npx playwright test'
 
