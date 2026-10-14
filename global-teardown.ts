@@ -32,29 +32,29 @@ async function globalTeardown() {
     console.log(`executionFolder  ${executionFolder}`);
     console.log(`resultsFolder  ${resultsFolder}`);
 
-    try {
+    // try {
 
-        execSync(
-            `allure generate "${resultsFolder}" --clean --single-file -o "${finalReportFolder}"`,
-            {
-                stdio: 'inherit'
-            }
-        );
+    //     execSync(
+    //         `allure generate "${resultsFolder}" --clean --single-file -o "${finalReportFolder}"`,
+    //         {
+    //             stdio: 'inherit'
+    //         }
+    //     );
 
     
-        console.log('\n====================================');
-        console.log('Allure Report Generated Successfully');
-        console.log(`Location: ${executionFolder}`);
-        console.log('====================================\n');
+//         console.log('\n====================================');
+//         console.log('Allure Report Generated Successfully');
+//         console.log(`Location: ${executionFolder}`);
+//         console.log('====================================\n');
 
-    } catch (error) {
+//     } catch (error) {
 
-        console.error(
-            'Failed to generate Allure report:',
-            error
-        );
-        throw error;
-    }
-}
+//         console.error(
+//             'Failed to generate Allure report:',
+//             error
+//         );
+//         throw error;
+//     }
+ }
 
 export default globalTeardown;

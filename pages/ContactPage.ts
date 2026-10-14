@@ -50,7 +50,6 @@ if (await this.Create.isVisible()) {
     await this.page.getByText('Do not Text', { exact: true })
         .locator('..')
         .getByRole('checkbox').setChecked(contact?.isDoNotText ?? true);
-    
     await this.page.getByText('Do not Email', { exact: true })
         .locator('..')
         .getByRole('checkbox').setChecked(contact?.isDoNotEmail ?? true);
@@ -64,7 +63,6 @@ if (await this.Create.isVisible()) {
     const referredBy = contact?.referredBy ?? 'Sam';
     await this.page.getByRole('combobox', { name: 'Search' }).fill(referredBy);
     await this.page.getByRole('button', { name: referredBy }).nth(1).click();
-
 await this.Save.click();
 
 const savedContact = this.page.getByRole('heading', {
