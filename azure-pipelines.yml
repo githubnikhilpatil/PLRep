@@ -17,7 +17,13 @@ steps:
   - script: npm ci
     displayName: 'Install dependencies'
 
-  - script: npx playwright install chromium
+  - script: npx playwright install --list
+            if errorlevel 1 (
+                 npx playwright install chromium firefox webkit
+            ) else (
+               echo Playwright browser check completed.
+               npx playwright install chromium firefox webkit
+            )
     displayName: 'Install Playwright Chromium'
 
   - script: npx playwright test --grep "@TC0011"
