@@ -3,12 +3,14 @@ import { expect } from '@playwright/test';
 import { LoginPage } from '../../pages/LoginPage';
 import { HomePage } from '../../pages/HomePage';
 import {ContactPage} from '../../pages/ContactPage';
+import { DealPage } from '../../pages/DealPage';
 import { env } from '../../config/env';
 import { chromium, firefox,Browser, BrowserContext } from '@playwright/test';
 import { AllureHelper } from '../../utils/AllureHelper';
 import { TestDataReader }  from '../../utils/TestDataReader';
 import { ContactDataMapper } from '../../data-mapper/ContactDataMapper';
-
+import { DealDataMapper } from '../../data-mapper/DealDataMapper';
+import { GenericUtilityHelper  } from '../../utils/GenericUtilityHelper'
 
 test('Login to CRM ',{
         tag: ['@TC0011']
@@ -31,7 +33,7 @@ await page.goto(env.App_URL);
 await page.waitForLoadState('networkidle');
 const loginPage = new LoginPage(page);
 const username = env.username;
-const password = env.password;
+const password = GenericUtilityHelper.decryptPassword( env.password);
 await loginPage.login(username, password);
 const homePage =  new HomePage(page);
 await page.waitForLoadState('networkidle');
@@ -39,6 +41,7 @@ await AllureHelper.info(page,'navingating to Home page', 'Successful',true);
 await page.waitForTimeout(5000);
 if(await homePage.validateHomePageNavigation() )
 {
+    
  await AllureHelper.validate(page,'validateHomePageNavigatione','Passed',true);
 }
 else
@@ -100,6 +103,47 @@ await AllureHelper.info(page,'New contact is not created', 'Fail',true);
 }
 
 );
+
+test('Create New Deal', {
+        tag: ['@TC0021']
+    }, async ({ page }) => {
+    await AllureHelper.epic('CRM Application');
+    await AllureHelper.feature('Deals');
+    await AllureHelper.story('Create New Deal');
+    await AllureHelper.tags(
+        'Deal',
+        'create-Deal',
+        'regression'
+    );
+    const data = TestDataReader.getData('TC0021');
+    const deal = DealDataMapper.createDeal(data);
+    console.log('final deal data', deal);
+
+    await AllureHelper.info(page, 'navingating to Login page', 'Successful', true);
+    await page.goto(env.App_URL);
+    await page.waitForLoadState('networkidle');
+    const loginPage = new LoginPage(page);
+    await loginPage.login(env.username, env.password);
+
+    const homePage = new HomePage(page);
+    await page.waitForLoadState('networkidle');
+    await AllureHelper.info(page, 'navingating to Home page', 'Successful', true);
+    await homePage.Deals.waitFor({ state: 'visible' });
+    await homePage.Deals.click();
+
+    const dealPage = new DealPage(page);
+    const result = await dealPage.Create_New_Deal(deal);
+
+    expect(result.success).toBeTruthy();
+    await AllureHelper.info(
+        page,
+        `New deal ${result.DealTitle} is created`,
+        'Successful',
+        true
+    );
+});
+
+
 
 test('Delete Created New Contact', {
         tag: ['@TC0002']

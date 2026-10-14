@@ -1,0 +1,53 @@
+{
+  "Contacts": [
+    {
+      "TestCaseID": "TC0001",
+      "Scenario": "Create New Contact",
+      "FirstName": "Vinit",
+      "LastName": "Pathak",
+      "Category": "Lead",
+      "Status": "Active",
+      "Is_Do_not_Call": "Yes",
+      "Is_Do_not_Text": "Yes",
+      "Is_Do_not_Email": "Yes",
+      "Birth_Day": 1,
+      "Birth_Month": 5,
+      "Birth_Year": 1995,
+      "Referred_By": "Sam1 vame1",
+      "Rating": 2
+    },
+    {
+      "TestCaseID": "TC0002",
+      "Scenario": "Delete Created New Contact",
+      "FirstName": "Sameer",
+      "LastName": "Pathak",
+      "Category": "Lead",
+      "Status": "Active",
+      "Is_Do_not_Call": "Yes",
+      "Is_Do_not_Text": "Yes",
+      "Is_Do_not_Email": "Yes",
+      "Birth_Day": 1,
+      "Birth_Month": 5,
+      "Birth_Year": 1995,
+      "Referred_By": "Sam1 vame1",
+      "Rating": 2
+    }
+  ],
+  "Login": [
+    {
+      "TestCase": "TC0011"
+    }
+  ],
+  "Customer": [],
+  "Deal": [
+    {
+      "TestCaseID": "TC0021",
+      "Scenario": "Create New Deal",
+      "DealsTitle": "ndianOilTranformer",
+      "UserAccess": "Nikhil Patil",
+      "Company": "Indian Oil",
+      "Products": "Transformer",
+      "Contacts": "Sam1 Vam1"
+    }
+  ]
+}

@@ -2,6 +2,8 @@ import { defineConfig,devices  } from '@playwright/test';
 import path from 'path';
 import { createExecutionFolder } from './utils/ExecutionFolder';
 
+const browser = (process.env.BROWSER || 'chromium').toLowerCase();
+
 const executionFolder = createExecutionFolder();
 
 process.env.ALLURE_EXECUTION_FOLDER = executionFolder;
@@ -35,10 +37,12 @@ export default defineConfig({
     actionTimeout: 0,
     trace: 'on-first-retry',
   },
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-  ],
+      projects: [
+        {
+            name: browser,
+            use: {
+                browserName: browser as 'chromium' | 'firefox' | 'webkit'
+            }
+        }
+    ],
 });

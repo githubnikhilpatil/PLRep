@@ -1,8 +1,9 @@
 import { Page, Locator } from '@playwright/test';
 import {GenericUtilityHelper} from '../utils/GenericUtilityHelper';
+import {BasePage} from './BasePage';
 import { Contact } from '../entities/Contact';
 
-export class ContactPage{
+export class ContactPage extends BasePage{
 
 readonly page: Page;
 readonly pageTitle: Locator;
@@ -10,10 +11,11 @@ readonly Contacts: Locator;
 readonly Create: Locator;
 readonly FirstName: Locator;
 readonly LastName: Locator;
-readonly SaveContact : Locator;
+
 
 
 constructor( page:Page) {
+ super(page);
 this.page =page;
 this.pageTitle = page.getByRole('heading',{name:'New Contact', exact: true });
 this.Contacts =page.getByRole('link', { name: 'Contacts', exact: true });
@@ -21,7 +23,7 @@ this.Create =page.getByRole('button', { name: 'Create', exact: true });
 
 this.FirstName = page.getByRole('textbox', { name: 'First Name' });
 this.LastName = page.getByRole('textbox', { name: 'Last Name' });
-this.SaveContact = page.getByRole('button',{name : 'Save',exact:true} );
+
 
 }
 
@@ -63,7 +65,7 @@ if (await this.Create.isVisible()) {
     await this.page.getByRole('textbox', { name: 'Search' }).fill(referredBy);
     await this.page.getByRole('button', { name: referredBy }).nth(1).click();
 
-await this.SaveContact.click();
+await this.Save.click();
 
 const savedContact = this.page.getByRole('heading', {
     name: `${firstname} ${lastname}`,
