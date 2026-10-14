@@ -19,7 +19,7 @@ export const test = base.extend<MyFixtures>({
 
         let browser: Browser;
 
-        if (browserName === 'chrome') {
+        if (browserName === 'chrome'  || browserName === 'chromium' ) {
 
             browser = await chromium.launch({
                 channel: 'chrome',
