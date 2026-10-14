@@ -17,7 +17,7 @@ async function globalSetup() {
     );
 
     console.log( 'BROWSER is' +process.env.BROWSER); 
-    console.log( 'ENV is' + env.environment.toUpperCase()); 
+    console.log( 'ENV is' + process.env.ENV); 
 
     if (!fs.existsSync(filePath)) {
         throw new Error(
