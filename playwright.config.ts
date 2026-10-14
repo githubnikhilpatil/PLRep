@@ -13,6 +13,8 @@ const allureResultsFolder = path.join(
     'temp-results'
 );
 
+process.env.ALLURE_RESULTS_FOLDER = allureResultsFolder;
+
 export default defineConfig({
   testDir: './tests',
   testMatch: '**/*.spec.ts',
@@ -22,16 +24,16 @@ export default defineConfig({
   workers: 8,
   retries: 0,
   globalSetup: './global-setup.ts',
-//globalTeardown: './global-teardown.ts',
+  globalTeardown: './global-teardown.ts',
     reporter: [
         [ 'allure-playwright',
             {
-               resultsDir: 'allure-results',
+               resultsDir: allureResultsFolder,
                 detail: false
             }]
     ],
   use: {
-    headless: true,
+    headless: false,
     screenshot: 'only-on-failure',
     viewport: { width: 1280, height: 720 },
     actionTimeout: 0,

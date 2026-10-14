@@ -5,13 +5,26 @@ import path from 'path';
 
 async function globalTeardown() {
 
-    const executionFolder = process.env.ALLURE_EXECUTION_FOLDER; 
+    const executionFolder = process.env.ALLURE_EXECUTION_FOLDER;
+    const resultsFolder = process.env.ALLURE_RESULTS_FOLDER;
 
-    const resultsFolder = path.join(
-        executionFolder,
-        'temp-results'
+    if (!executionFolder || !resultsFolder) {
+        throw new Error(
+            'ALLURE_EXECUTION_FOLDER and ALLURE_RESULTS_FOLDER must be set before generating the report.'
+        );
+    }
+
+    const resultFiles = fs.readdirSync(resultsFolder).filter(
+        (file) => file.endsWith('-result.json')
     );
-    const finalReportFolder = path.join(executionFolder,'FinalReport');
+
+    if (resultFiles.length === 0) {
+        throw new Error(
+            `No Allure test result files were found in: ${resultsFolder}`
+        );
+    }
+
+    const finalReportFolder = path.join(executionFolder, 'FinalReport');
 
     console.log('\n====================================');
     console.log('Generating Allure Report');
@@ -22,7 +35,7 @@ async function globalTeardown() {
     try {
 
         execSync(
-            `allure generate "${resultsFolder}"--clean -o "${finalReportFolder}"`,
+            `allure generate "${resultsFolder}" --clean --single-file -o "${finalReportFolder}"`,
             {
                 stdio: 'inherit'
             }
@@ -40,6 +53,7 @@ async function globalTeardown() {
             'Failed to generate Allure report:',
             error
         );
+        throw error;
     }
 }
 
