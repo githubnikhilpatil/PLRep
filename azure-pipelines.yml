@@ -1,6 +1,24 @@
 trigger:
   - main
 
+parameters:
+  - name: environment
+    displayName: 'Select Environment'
+    type: string
+    default: 'QA'
+    values:
+      - QA
+      - UAT
+
+  - name: browsers
+    displayName: 'Select Browser'
+    type: string
+    default: 'chromium'
+    values:
+      - chromium
+      - firefox
+      - webkit
+
 schedules:
   - cron: "0 * * * *"
     displayName: "Run Every Hour"
@@ -37,3 +55,5 @@ steps:
 
   - script: npx playwright test --grep "@TC0011"
     displayName: 'npx playwright test --grep "@TC0011"'
+
+
