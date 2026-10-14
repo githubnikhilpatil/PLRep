@@ -65,12 +65,7 @@ steps:
   - script: npx playwright install chromium firefox webkit
     displayName: 'Install Playwright Browsers'
 
-  - script: |
-      echo JAVA_HOME=%JAVA_HOME%
-      java -version
-      allure --version
-      allure generate --help
-    displayName: 'Verify Java and Allure'
+
         
 
 
@@ -111,6 +106,12 @@ steps:
         }
       workingDirectory: '$(Build.SourcesDirectory)'
 
+  - script: |
+      echo JAVA_HOME=%JAVA_HOME%
+      java -version
+      allure --version
+      allure generate --help
+    displayName: 'Verify Java and Allure'
 
   - script: npx playwright test
     env:
