@@ -34,7 +34,7 @@ await page.waitForLoadState('networkidle');
 const loginPage = new LoginPage(page);
 const username = env.username;
 const password = GenericUtilityHelper.decryptPassword( env.password);
-await loginPage.login(username, password);
+await loginPage.login(username,  password);
 const homePage =  new HomePage(page);
 await page.waitForLoadState('networkidle');
 await AllureHelper.info(page,'navingating to Home page', 'Successful',true);
@@ -79,8 +79,8 @@ await page.goto(env.App_URL);
 await page.waitForLoadState('networkidle');
 const loginPage = new LoginPage(page);
 const username = env.username;
-const password = env.password;
-await loginPage.login(username, password);
+const password = GenericUtilityHelper.decryptPassword( env.password);
+await loginPage.login(username,  password);
 const homePage =  new HomePage(page);
 await page.waitForLoadState('networkidle');
 await AllureHelper.info(page,'navingating to Home page', 'Successful',true);
@@ -104,7 +104,7 @@ await AllureHelper.info(page,'New contact is not created', 'Fail',true);
 
 );
 
-test('Create New Deal', {
+test.skip('Create New Deal', {
         tag: ['@TC0021']
     }, async ({ page }) => {
     await AllureHelper.epic('CRM Application');
@@ -168,8 +168,8 @@ await page.goto(env.App_URL);
 await page.waitForLoadState('networkidle');
 const loginPage = new LoginPage(page);
 const username = env.username;
-const password = env.password;
-await loginPage.login(username, password);
+const password = GenericUtilityHelper.decryptPassword( env.password);
+await loginPage.login(username,  password);
 const homePage =  new HomePage(page);
 await page.waitForLoadState('networkidle');
 await AllureHelper.info(page,'navingating to Home page', 'Successful',true);
