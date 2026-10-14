@@ -2,6 +2,7 @@ import {
     test as base,
     chromium,
     firefox,
+    webkit,
     Browser,
     BrowserContext,
     Page
@@ -36,6 +37,12 @@ export const test = base.extend<MyFixtures>({
         } else if (browserName === 'firefox') {
 
             browser = await firefox.launch({
+                headless: false
+            });
+
+        } else if (browserName === 'webkit') {
+
+            browser = await webkit.launch({
                 headless: false
             });
 
