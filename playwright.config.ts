@@ -31,7 +31,7 @@ export default defineConfig({
             }]
     ],
   use: {
-    headless: false,
+    headless: true,
     screenshot: 'only-on-failure',
     viewport: { width: 1280, height: 720 },
     actionTimeout: 0,
