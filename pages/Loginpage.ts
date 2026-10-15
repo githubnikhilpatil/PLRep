@@ -7,6 +7,7 @@ readonly page: Page;
 readonly LoginName: Locator;
 readonly LoginPassword: Locator;
 readonly Login:Locator;
+readonly SignUp:Locator;
 
 
 constructor(page: Page)
@@ -15,6 +16,7 @@ this.page = page;
 this.LoginName =page.locator('input[type="email"]');
 this.LoginPassword = page.locator('input[type="password"]');
 this.Login = page.getByRole('button',{name:'Login'});
+this.SignUp = page.getByRole('link', { name: 'Sign Up' })
 }
 
 
@@ -27,5 +29,8 @@ public async login(username: string, password: string): Promise<void> {
     await this.Login.click();
 }
 
+public async navigateToSignUp(): Promise<void> {
+    await this.SignUp.click();
+}
 
 }
