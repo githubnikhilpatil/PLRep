@@ -267,10 +267,10 @@ steps:
       publishLocation: 'pipeline'
 
   # --------------------------------------------------
-  # 10. Email summary and Allure ZIP using Gmail
+  # 9. Send professional HTML email using Gmail
   # --------------------------------------------------
   - task: PowerShell@2
-    displayName: 'Email Allure Results and Test Summary'
+    displayName: 'Email Allure Report and Test Summary'
     condition: and(always(), eq(variables['AllureZipCreated'], 'true'))
     inputs:
       targetType: inline
@@ -288,6 +288,32 @@ steps:
           throw "Gmail configuration is missing. Check GMAIL_USERNAME, GMAIL_APP_PASSWORD and GMAIL_TO."
         }
 
+        $total = [int]"$(AllureTotal)"
+        $passed = [int]"$(AllurePassed)"
+        $failed = [int]"$(AllureFailed)"
+        $broken = [int]"$(AllureBroken)"
+        $skipped = [int]"$(AllureSkipped)"
+        $unknown = [int]"$(AllureUnknown)"
+        $passRate = [double]"$(AllurePassRate)"
+
+        $passRateWidth = [math]::Max(0, [math]::Min(100, $passRate))
+
+        if ($total -eq 0) {
+          $statusText = "NO RESULTS FOUND"
+          $statusColor = "#64748b"
+          $statusBackground = "#f1f5f9"
+        }
+        elseif ($failed -gt 0 -or $broken -gt 0 -or $unknown -gt 0) {
+          $statusText = "ATTENTION REQUIRED"
+          $statusColor = "#dc2626"
+          $statusBackground = "#fef2f2"
+        }
+        else {
+          $statusText = "EXECUTION COMPLETED"
+          $statusColor = "#15803d"
+          $statusBackground = "#f0fdf4"
+        }
+
         $securePassword = ConvertTo-SecureString `
           $env:GMAIL_APP_PASSWORD `
           -AsPlainText `
@@ -299,37 +325,152 @@ steps:
             $securePassword
           )
 
-        $subject = "Playwright Test Results - Build $(Build.BuildNumber)"
+        $subject = "Playwright Results | Build $(Build.BuildNumber) | $statusText"
 
-        $body = @"
-        Hello,
+        $htmlBody = @"
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin:0;padding:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#1e293b;">
 
-        The Playwright pipeline execution has completed.
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f1f5f9;">
+        <tr><td align="center" style="padding:24px 10px;">
 
-        BUILD DETAILS
-        =============
-        Build Number: $(Build.BuildNumber)
-        Environment: ${{ parameters.environment }}
-        Browser: ${{ parameters.browsers }}
-        Execution Type: ${{ parameters.ExecutionType }}
-        Module: ${{ parameters.Module }}
+        <table role="presentation" width="640" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:640px;background:#ffffff;border-radius:12px;overflow:hidden;">
 
-        ALLURE TEST SUMMARY
-        ==================
-        Total Tests: $(AllureTotal)
-        Passed: $(AllurePassed)
-        Failed: $(AllureFailed)
-        Broken: $(AllureBroken)
-        Skipped: $(AllureSkipped)
-        Unknown: $(AllureUnknown)
-        Pass Rate: $(AllurePassRate)%
+        <tr>
+        <td style="background:#172554;padding:28px 30px;color:#ffffff;">
+        <div style="font-size:12px;letter-spacing:2px;color:#93c5fd;font-weight:bold;">QUALITY ENGINEERING</div>
+        <div style="font-size:25px;font-weight:bold;margin-top:12px;">Playwright Test Report</div>
+        <div style="font-size:13px;color:#cbd5e1;margin-top:8px;">Automated test execution summary</div>
+        </td>
+        </tr>
 
-        The Allure temp-results ZIP and TestSummary.txt are attached.
+        <tr>
+        <td style="padding:24px 30px 8px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:$statusBackground;border-radius:8px;">
+        <tr><td style="padding:14px 16px;">
+        <div style="font-size:11px;color:$statusColor;font-weight:bold;letter-spacing:1px;">EXECUTION STATUS</div>
+        <div style="font-size:18px;font-weight:bold;color:$statusColor;margin-top:5px;">$statusText</div>
+        </td></tr>
+        </table>
+        </td>
+        </tr>
 
-        You can also download the artifacts from the Azure DevOps pipeline run.
+        <tr>
+        <td style="padding:16px 22px 8px;">
+        <div style="font-size:18px;font-weight:bold;color:#0f172a;margin:0 8px 14px;">Test Execution Overview</div>
 
-        Regards,
-        Azure DevOps Playwright Automation
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+        <td width="50%" style="padding:6px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
+        <tr><td style="padding:16px;">
+        <div style="font-size:12px;color:#64748b;">Total Tests</div>
+        <div style="font-size:30px;font-weight:bold;color:#0f172a;margin-top:6px;">$total</div>
+        </td></tr></table>
+        </td>
+        <td width="50%" style="padding:6px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;">
+        <tr><td style="padding:16px;">
+        <div style="font-size:12px;color:#166534;">Passed</div>
+        <div style="font-size:30px;font-weight:bold;color:#15803d;margin-top:6px;">$passed</div>
+        </td></tr></table>
+        </td>
+        </tr>
+
+        <tr>
+        <td width="50%" style="padding:6px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;">
+        <tr><td style="padding:16px;">
+        <div style="font-size:12px;color:#991b1b;">Failed</div>
+        <div style="font-size:30px;font-weight:bold;color:#dc2626;margin-top:6px;">$failed</div>
+        </td></tr></table>
+        </td>
+        <td width="50%" style="padding:6px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;">
+        <tr><td style="padding:16px;">
+        <div style="font-size:12px;color:#9a3412;">Broken</div>
+        <div style="font-size:30px;font-weight:bold;color:#ea580c;margin-top:6px;">$broken</div>
+        </td></tr></table>
+        </td>
+        </tr>
+        </table>
+
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:8px;">
+        <tr>
+        <td style="padding:8px;color:#64748b;font-size:13px;">Skipped: <strong style="color:#334155;">$skipped</strong></td>
+        <td style="padding:8px;color:#64748b;font-size:13px;text-align:right;">Unknown: <strong style="color:#334155;">$unknown</strong></td>
+        </tr>
+        </table>
+        </td>
+        </tr>
+
+        <tr>
+        <td style="padding:18px 30px 24px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+        <td style="font-size:15px;font-weight:bold;color:#334155;">Overall Pass Rate</td>
+        <td align="right" style="font-size:22px;font-weight:bold;color:#15803d;">$passRate%</td>
+        </tr>
+        <tr><td colspan="2" style="padding-top:12px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#e2e8f0;border-radius:6px;">
+        <tr>
+        <td width="$passRateWidth%" height="10" style="height:10px;background:#16a34a;border-radius:6px;font-size:1px;line-height:1px;">&nbsp;</td>
+        <td style="font-size:1px;line-height:1px;">&nbsp;</td>
+        </tr>
+        </table>
+        </td></tr>
+        </table>
+        </td>
+        </tr>
+
+        <tr>
+        <td style="padding:22px 30px;background:#f8fafc;border-top:1px solid #e2e8f0;">
+        <div style="font-size:17px;font-weight:bold;color:#0f172a;margin-bottom:14px;">Execution Details</div>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size:13px;">
+        <tr><td style="padding:8px 0;color:#64748b;">Build Number</td><td align="right" style="padding:8px 0;font-weight:bold;">$(Build.BuildNumber)</td></tr>
+        <tr><td style="padding:8px 0;color:#64748b;">Environment</td><td align="right" style="padding:8px 0;font-weight:bold;">${{ parameters.environment }}</td></tr>
+        <tr><td style="padding:8px 0;color:#64748b;">Browser</td><td align="right" style="padding:8px 0;font-weight:bold;">${{ parameters.browsers }}</td></tr>
+        <tr><td style="padding:8px 0;color:#64748b;">Execution Type</td><td align="right" style="padding:8px 0;font-weight:bold;">${{ parameters.ExecutionType }}</td></tr>
+        <tr><td style="padding:8px 0;color:#64748b;">Module</td><td align="right" style="padding:8px 0;font-weight:bold;">${{ parameters.Module }}</td></tr>
+        </table>
+        </td>
+        </tr>
+
+        <tr>
+        <td style="padding:24px 30px;">
+        <div style="font-size:17px;font-weight:bold;color:#0f172a;margin-bottom:12px;">Report Attachments</div>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><td style="padding:12px;border:1px solid #e2e8f0;border-radius:8px;">
+        <div style="font-size:14px;font-weight:bold;color:#1d4ed8;">Allure-temp-results.zip</div>
+        <div style="font-size:12px;color:#64748b;margin-top:5px;">Raw Allure test result files</div>
+        </td></tr>
+        <tr><td height="10" style="height:10px;font-size:1px;">&nbsp;</td></tr>
+        <tr><td style="padding:12px;border:1px solid #e2e8f0;border-radius:8px;">
+        <div style="font-size:14px;font-weight:bold;color:#334155;">TestSummary.txt</div>
+        <div style="font-size:12px;color:#64748b;margin-top:5px;">Text version of the execution summary</div>
+        </td></tr>
+        </table>
+        <div style="font-size:12px;color:#64748b;line-height:1.6;margin-top:14px;">The reports are attached to this email. You can also download them from the Artifacts section of the Azure DevOps pipeline run.</div>
+        </td>
+        </tr>
+
+        <tr>
+        <td style="background:#172554;padding:20px 30px;text-align:center;color:#cbd5e1;">
+        <div style="font-size:13px;font-weight:bold;color:#ffffff;">Playwright Automation Framework</div>
+        <div style="font-size:11px;margin-top:6px;">Automated notification from Azure DevOps</div>
+        </td>
+        </tr>
+
+        </table>
+        </td></tr>
+        </table>
+        </body>
+        </html>
         "@
 
         $attachments = @($zipPath)
@@ -347,14 +488,15 @@ steps:
             -From $env:GMAIL_USERNAME `
             -To $env:GMAIL_TO `
             -Subject $subject `
-            -Body $body `
+            -Body $htmlBody `
+            -BodyAsHtml `
             -Attachments $attachments `
             -ErrorAction Stop
 
-          Write-Host "Test summary email sent successfully."
+          Write-Host "HTML test report email sent successfully."
         }
         catch {
-          Write-Error "Failed to send test summary email: $($_.Exception.Message)"
+          Write-Error "Failed to send HTML email: $($_.Exception.Message)"
           throw
         }
     env:
