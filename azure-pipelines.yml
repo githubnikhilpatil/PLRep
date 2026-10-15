@@ -255,15 +255,28 @@ steps:
       publishLocation: 'pipeline'
 
 
-  # 9. Email the ZIP using Gmail
+  # --------------------------------------------------
+  # 9. Publish test summary for download
+  # --------------------------------------------------
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish Test Summary'
+    condition: always()
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)\TestSummary.txt'
+      artifact: 'Playwright-Test-Summary'
+      publishLocation: 'pipeline'
+
+  # --------------------------------------------------
+  # 10. Email summary and Allure ZIP using Gmail
+  # --------------------------------------------------
   - task: PowerShell@2
-    displayName: 'Email Allure ZIP using Gmail'
+    displayName: 'Email Allure Results and Test Summary'
     condition: and(always(), eq(variables['AllureZipCreated'], 'true'))
     inputs:
       targetType: inline
-      workingDirectory: '$(Build.SourcesDirectory)'
       script: |
         $zipPath = "$(Build.ArtifactStagingDirectory)\Allure-temp-results.zip"
+        $summaryPath = "$(Build.ArtifactStagingDirectory)\TestSummary.txt"
 
         if (!(Test-Path $zipPath)) {
           throw "Allure ZIP attachment not found: $zipPath"
@@ -276,7 +289,9 @@ steps:
         }
 
         $securePassword = ConvertTo-SecureString `
-          $env:GMAIL_APP_PASSWORD -AsPlainText -Force
+          $env:GMAIL_APP_PASSWORD `
+          -AsPlainText `
+          -Force
 
         $credential = New-Object `
           System.Management.Automation.PSCredential(
@@ -284,26 +299,44 @@ steps:
             $securePassword
           )
 
-        $subject = "Automation Report - Build $(Build.BuildNumber)- ${{ parameters.environment }}-${{ parameters.Module }} "
+        $subject = "Playwright Test Results - Build $(Build.BuildNumber)"
 
         $body = @"
         Hello,
 
         The Playwright pipeline execution has completed.
 
+        BUILD DETAILS
+        =============
         Build Number: $(Build.BuildNumber)
         Environment: ${{ parameters.environment }}
         Browser: ${{ parameters.browsers }}
         Execution Type: ${{ parameters.ExecutionType }}
         Module: ${{ parameters.Module }}
 
-        The Allure temp-results ZIP is attached to this email.
+        ALLURE TEST SUMMARY
+        ==================
+        Total Tests: $(AllureTotal)
+        Passed: $(AllurePassed)
+        Failed: $(AllureFailed)
+        Broken: $(AllureBroken)
+        Skipped: $(AllureSkipped)
+        Unknown: $(AllureUnknown)
+        Pass Rate: $(AllurePassRate)%
 
-        You can also download it from the Azure DevOps pipeline artifacts.
+        The Allure temp-results ZIP and TestSummary.txt are attached.
+
+        You can also download the artifacts from the Azure DevOps pipeline run.
 
         Regards,
         Azure DevOps Playwright Automation
         "@
+
+        $attachments = @($zipPath)
+
+        if (Test-Path $summaryPath) {
+          $attachments += $summaryPath
+        }
 
         try {
           Send-MailMessage `
@@ -315,19 +348,17 @@ steps:
             -To $env:GMAIL_TO `
             -Subject $subject `
             -Body $body `
-            -Attachments $zipPath `
+            -Attachments $attachments `
             -ErrorAction Stop
 
-          Write-Host "Allure ZIP email sent successfully."
+          Write-Host "Test summary email sent successfully."
         }
         catch {
-          Write-Error "Failed to send Allure ZIP email: $($_.Exception.Message)"
+          Write-Error "Failed to send test summary email: $($_.Exception.Message)"
           throw
         }
     env:
       GMAIL_USERNAME: $(GMAIL_USERNAME)
       GMAIL_APP_PASSWORD: $(GMAIL_APP_PASSWORD)
       GMAIL_TO: $(GMAIL_TO)
-
-
 
