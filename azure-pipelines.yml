@@ -72,6 +72,112 @@ steps:
       BROWSER: ${{ parameters.browsers }}
     displayName: 'npx playwright test'
 
+  # --------------------------------------------------
+  # 6. Calculate Allure test summary
+  # --------------------------------------------------
+  - task: PowerShell@2
+    displayName: 'Calculate Allure Test Summary'
+    condition: always()
+    inputs:
+      targetType: inline
+      script: |
+        $allureRoot = "$(Build.SourcesDirectory)\AllureReports"
+
+        $total = 0
+        $passed = 0
+        $failed = 0
+        $broken = 0
+        $skipped = 0
+        $unknown = 0
+
+        $summaryDirectory = "$(Build.ArtifactStagingDirectory)"
+        New-Item -ItemType Directory -Force -Path $summaryDirectory | Out-Null
+
+        $latestFolder = $null
+
+        if (Test-Path $allureRoot) {
+          $latestFolder = Get-ChildItem `
+            -Path $allureRoot `
+            -Directory `
+            -Filter "AllureReport_*" |
+            Sort-Object LastWriteTime -Descending |
+            Select-Object -First 1
+        }
+
+        if ($latestFolder) {
+          $resultsFolder = Join-Path $latestFolder.FullName "temp-results"
+
+          if (Test-Path $resultsFolder) {
+            $resultFiles = Get-ChildItem `
+              -Path $resultsFolder `
+              -Filter "*-result.json" `
+              -File
+
+            foreach ($file in $resultFiles) {
+              try {
+                $result = Get-Content $file.FullName -Raw |
+                  ConvertFrom-Json
+
+                $total++
+
+                switch ($result.status) {
+                  "passed"  { $passed++ }
+                  "failed"  { $failed++ }
+                  "broken"  { $broken++ }
+                  "skipped" { $skipped++ }
+                  default   { $unknown++ }
+                }
+              }
+              catch {
+                Write-Warning "Could not read result file: $($file.Name)"
+              }
+            }
+          }
+        }
+
+        $passRate = if ($total -gt 0) {
+          [math]::Round(($passed / $total) * 100, 2)
+        } else {
+          0
+        }
+
+        $summary = @"
+        Playwright Automation Test Summary
+        ==================================
+        Build Number: $(Build.BuildNumber)
+        Environment: ${{ parameters.environment }}
+        Browser: ${{ parameters.browsers }}
+        Execution Type: ${{ parameters.ExecutionType }}
+        Module: ${{ parameters.Module }}
+
+        Total Tests: $total
+        Passed: $passed
+        Failed: $failed
+        Broken: $broken
+        Skipped: $skipped
+        Unknown: $unknown
+        Pass Rate: $passRate%
+        "@
+
+        Write-Host ""
+        Write-Host $summary
+
+        $summaryPath = Join-Path $summaryDirectory "TestSummary.txt"
+
+        Set-Content `
+          -Path $summaryPath `
+          -Value $summary `
+          -Encoding UTF8
+
+        Write-Host "##vso[task.setvariable variable=AllureTotal]$total"
+        Write-Host "##vso[task.setvariable variable=AllurePassed]$passed"
+        Write-Host "##vso[task.setvariable variable=AllureFailed]$failed"
+        Write-Host "##vso[task.setvariable variable=AllureBroken]$broken"
+        Write-Host "##vso[task.setvariable variable=AllureSkipped]$skipped"
+        Write-Host "##vso[task.setvariable variable=AllureUnknown]$unknown"
+        Write-Host "##vso[task.setvariable variable=AllurePassRate]$passRate"
+
+
 # 7. ZIP only the latest execution's temp-results folder
   - task: PowerShell@2
     displayName: 'Zip Allure temp-results'
@@ -222,5 +328,6 @@ steps:
       GMAIL_USERNAME: $(GMAIL_USERNAME)
       GMAIL_APP_PASSWORD: $(GMAIL_APP_PASSWORD)
       GMAIL_TO: $(GMAIL_TO)
+
 
 
