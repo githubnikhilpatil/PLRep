@@ -147,3 +147,80 @@ steps:
       targetPath: '$(Build.ArtifactStagingDirectory)\Allure-temp-results.zip'
       artifact: 'Allure-temp-results'
       publishLocation: 'pipeline'
+
+
+  # 9. Email the ZIP using Gmail
+  - task: PowerShell@2
+    displayName: 'Email Allure ZIP using Gmail'
+    condition: and(always(), eq(variables['AllureZipCreated'], 'true'))
+    inputs:
+      targetType: inline
+      workingDirectory: '$(Build.SourcesDirectory)'
+      script: |
+        $zipPath = "$(Build.ArtifactStagingDirectory)\Allure-temp-results.zip"
+
+        if (!(Test-Path $zipPath)) {
+          throw "Allure ZIP attachment not found: $zipPath"
+        }
+
+        if ([string]::IsNullOrWhiteSpace($env:GMAIL_USERNAME) -or
+            [string]::IsNullOrWhiteSpace($env:GMAIL_APP_PASSWORD) -or
+            [string]::IsNullOrWhiteSpace($env:GMAIL_TO)) {
+          throw "Gmail configuration is missing. Check GMAIL_USERNAME, GMAIL_APP_PASSWORD and GMAIL_TO."
+        }
+
+        $securePassword = ConvertTo-SecureString `
+          $env:GMAIL_APP_PASSWORD -AsPlainText -Force
+
+        $credential = New-Object `
+          System.Management.Automation.PSCredential(
+            $env:GMAIL_USERNAME,
+            $securePassword
+          )
+
+        $subject = "Playwright Allure Results - Build $(Build.BuildNumber)"
+
+        $body = @"
+        Hello,
+
+        The Playwright pipeline execution has completed.
+
+        Build Number: $(Build.BuildNumber)
+        Environment: ${{ parameters.environment }}
+        Browser: ${{ parameters.browsers }}
+        Execution Type: ${{ parameters.ExecutionType }}
+        Module: ${{ parameters.Module }}
+
+        The Allure temp-results ZIP is attached to this email.
+
+        You can also download it from the Azure DevOps pipeline artifacts.
+
+        Regards,
+        Azure DevOps Playwright Automation
+        "@
+
+        try {
+          Send-MailMessage `
+            -SmtpServer "smtp.gmail.com" `
+            -Port 587 `
+            -UseSsl `
+            -Credential $credential `
+            -From $env:GMAIL_USERNAME `
+            -To $env:GMAIL_TO `
+            -Subject $subject `
+            -Body $body `
+            -Attachments $zipPath `
+            -ErrorAction Stop
+
+          Write-Host "Allure ZIP email sent successfully."
+        }
+        catch {
+          Write-Error "Failed to send Allure ZIP email: $($_.Exception.Message)"
+          throw
+        }
+    env:
+      GMAIL_USERNAME: $(GMAIL_USERNAME)
+      GMAIL_APP_PASSWORD: $(GMAIL_APP_PASSWORD)
+      GMAIL_TO: $(GMAIL_TO)
+
+
