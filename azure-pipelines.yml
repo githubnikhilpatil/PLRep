@@ -178,7 +178,7 @@ steps:
             $securePassword
           )
 
-        $subject = "Playwright Allure Results - Build $(Build.BuildNumber)"
+        $subject = "Automation Report - Build $(Build.BuildNumber)- ${{ parameters.environment }}-${{ parameters.Module }} "
 
         $body = @"
         Hello,
