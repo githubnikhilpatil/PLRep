@@ -3,6 +3,7 @@ import { expect } from '@playwright/test';
 import { LoginPage } from '../../pages/LoginPage';
 import { HomePage } from '../../pages/HomePage';
 import {ContactPage} from '../../pages/ContactPage';
+import {SignUpPage} from '../../pages/SignUpPage';
 import { DealPage } from '../../pages/DealPage';
 import { env } from '../../config/env';
 import { chromium, firefox,Browser, BrowserContext } from '@playwright/test';
@@ -11,6 +12,48 @@ import { TestDataReader }  from '../../utils/TestDataReader';
 import { ContactDataMapper } from '../../data-mapper/ContactDataMapper';
 import { DealDataMapper } from '../../data-mapper/DealDataMapper';
 import { GenericUtilityHelper  } from '../../utils/GenericUtilityHelper'
+import { GmailHelper } from '../../utils/GmailHelper';
+
+
+
+
+test.skip('Register New User',{
+        tag: ['@TC0091']
+    },async({page}) =>
+{
+   await AllureHelper.epic('CRM Application');
+
+    await AllureHelper.feature('Register');
+
+    await AllureHelper.story('Register New User');
+
+await page.goto(env.App_URL);
+await page.waitForLoadState('networkidle');
+const loginPage = new LoginPage(page);
+await loginPage.navigateToSignUp();
+await page.waitForLoadState('networkidle');
+await AllureHelper.info(page,'navingating to Sign Up Page', 'Successful',true);
+const signupPage = new SignUpPage(page);
+const Newuser = signupPage.signup();
+await AllureHelper.info(page,'Sign Up Completed', 'Successful',true);
+
+await page.waitForTimeout(10000);
+ const verificationLink =
+await GmailHelper.getVerificationLink(
+            await Newuser,
+            'Validate your FreeCRM account',
+            'Click here to complete the account',
+            120_000
+        );
+await page.goto(verificationLink);
+await page.waitForLoadState('domcontentloaded');
+
+await page.waitForTimeout(10000);
+
+});
+
+
+
 
 test('Login to CRM ',{
         tag: ['@TC0011']

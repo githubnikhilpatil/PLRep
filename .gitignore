@@ -6,3 +6,5 @@ allure-report/
 .idea/
 .vscode/
 /.cache
+config/gmail/credentials.json
+config/gmail/token.json

@@ -7,6 +7,9 @@ export class GenericUtilityHelper {
     private static readonly encryptionIvLength = 12;
     private static readonly encryptionKeyLength = 32;
     private static readonly encryptionAuthTagLength = 16;
+    
+    private static readonly baseEmail =
+        'automationsusers@gmail.com';
 
     public static generateRandomString(length: number): string {
         if (!Number.isInteger(length) || length <= 0) {
@@ -38,6 +41,16 @@ export class GenericUtilityHelper {
 
     }
 
+ public static generateEmail(): string {
+        const alias =
+            `AutomationUser${this.generateRandomString(8)}`;
+
+        const [username, domain] = this.baseEmail.split('@');
+
+        return `${username}+${alias}@${domain}`;
+    }
+
+
       static async highlight(element: Locator): Promise<void> {
 
         await element.evaluate((element: HTMLElement) => {
@@ -60,3 +73,10 @@ export class GenericUtilityHelper {
     }
 }
 //GenericUtilityHelper.main();
+
+
+
+
+
+
+    
