@@ -266,6 +266,63 @@ steps:
       artifact: 'Playwright-Test-Summary'
       publishLocation: 'pipeline'
 
+
+  # 6. Run k6 performance test and generate HTML report
+  - task: PowerShell@2
+    displayName: 'Run k6 Performance Test'
+    inputs:
+      targetType: inline
+      script: |
+        npm run performance
+
+        if ($LASTEXITCODE -ne 0) {
+          throw "k6 performance test failed."
+        }
+      workingDirectory: '$(Build.SourcesDirectory)'
+    continueOnError: true
+
+
+
+  # 8. Create downloadable ZIP containing the k6 HTML report
+  - task: PowerShell@2
+    displayName: 'Create k6 HTML Report ZIP'
+    condition: always()
+    inputs:
+      targetType: inline
+      script: |
+        $reportPath = "$(Build.SourcesDirectory)\performance\dist\performance-report.html"
+        $zipPath = "$(Build.ArtifactStagingDirectory)\k6-Performance-HTML-Report.zip"
+
+        if (Test-Path $reportPath) {
+          New-Item -ItemType Directory -Force -Path "$(Build.ArtifactStagingDirectory)" | Out-Null
+
+          Compress-Archive -Path $reportPath -DestinationPath $zipPath -Force
+
+          if (Test-Path $zipPath) {
+            Write-Host "##vso[task.setvariable variable=K6HtmlZipCreated]true"
+            Write-Host "Created downloadable report ZIP: $zipPath"
+          }
+          else {
+            Write-Host "##vso[task.logissue type=warning]k6 report ZIP was not created."
+            Write-Host "##vso[task.setvariable variable=K6HtmlZipCreated]false"
+          }
+        }
+        else {
+          Write-Host "##vso[task.logissue type=warning]k6 HTML report not found: $reportPath"
+          Write-Host "##vso[task.setvariable variable=K6HtmlZipCreated]false"
+        }
+
+  # 9. Publish ZIP for download, even if k6 thresholds failed
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish k6 Performance Report ZIP'
+    condition: and(always(), eq(variables['K6HtmlZipCreated'], 'true'))
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)\k6-Performance-HTML-Report.zip'
+      artifact: 'k6-Performance-HTML-Report'
+      publishLocation: pipeline
+
+
+
   # --------------------------------------------------
   # 9. Send professional HTML email using Gmail
   # --------------------------------------------------
@@ -277,6 +334,7 @@ steps:
       script: |
         $zipPath = "$(Build.ArtifactStagingDirectory)\Allure-temp-results.zip"
         $summaryPath = "$(Build.ArtifactStagingDirectory)\TestSummary.txt"
+        $k6ZipPath = "$(Build.ArtifactStagingDirectory)\k6-Performance-HTML-Report.zip"
 
         if (!(Test-Path $zipPath)) {
           throw "Allure ZIP attachment not found: $zipPath"
@@ -478,6 +536,11 @@ steps:
         if (Test-Path $summaryPath) {
           $attachments += $summaryPath
         }
+        if (Test-Path $k6ZipPath) {
+          $attachments += $k6ZipPath
+        }
+                
+        
 
         try {
           Send-MailMessage `
@@ -504,58 +567,3 @@ steps:
       GMAIL_APP_PASSWORD: $(GMAIL_APP_PASSWORD)
       GMAIL_TO: $(GMAIL_TO)
 
-
-
-  # 6. Run k6 performance test and generate HTML report
-  - task: PowerShell@2
-    displayName: 'Run k6 Performance Test'
-    inputs:
-      targetType: inline
-      script: |
-        npm run performance
-
-        if ($LASTEXITCODE -ne 0) {
-          throw "k6 performance test failed."
-        }
-      workingDirectory: '$(Build.SourcesDirectory)'
-    continueOnError: true
-
-
-
-  # 8. Create downloadable ZIP containing the k6 HTML report
-  - task: PowerShell@2
-    displayName: 'Create k6 HTML Report ZIP'
-    condition: always()
-    inputs:
-      targetType: inline
-      script: |
-        $reportPath = "$(Build.SourcesDirectory)\performance\dist\performance-report.html"
-        $zipPath = "$(Build.ArtifactStagingDirectory)\k6-Performance-HTML-Report.zip"
-
-        if (Test-Path $reportPath) {
-          New-Item -ItemType Directory -Force -Path "$(Build.ArtifactStagingDirectory)" | Out-Null
-
-          Compress-Archive -Path $reportPath -DestinationPath $zipPath -Force
-
-          if (Test-Path $zipPath) {
-            Write-Host "##vso[task.setvariable variable=K6HtmlZipCreated]true"
-            Write-Host "Created downloadable report ZIP: $zipPath"
-          }
-          else {
-            Write-Host "##vso[task.logissue type=warning]k6 report ZIP was not created."
-            Write-Host "##vso[task.setvariable variable=K6HtmlZipCreated]false"
-          }
-        }
-        else {
-          Write-Host "##vso[task.logissue type=warning]k6 HTML report not found: $reportPath"
-          Write-Host "##vso[task.setvariable variable=K6HtmlZipCreated]false"
-        }
-
-  # 9. Publish ZIP for download, even if k6 thresholds failed
-  - task: PublishPipelineArtifact@1
-    displayName: 'Publish k6 Performance Report ZIP'
-    condition: and(always(), eq(variables['K6HtmlZipCreated'], 'true'))
-    inputs:
-      targetPath: '$(Build.ArtifactStagingDirectory)\k6-Performance-HTML-Report.zip'
-      artifact: 'k6-Performance-HTML-Report'
-      publishLocation: pipeline
