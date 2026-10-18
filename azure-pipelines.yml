@@ -525,21 +525,36 @@ steps:
   # 8. Create downloadable ZIP containing the k6 HTML report
   - task: PowerShell@2
     displayName: 'Create k6 HTML Report ZIP'
-    condition: and(always(), eq(variables['K6HtmlReportCreated'], 'true'))
+    condition: always()
     inputs:
       targetType: inline
       script: |
         $reportPath = "$(Build.SourcesDirectory)\performance\dist\performance-report.html"
         $zipPath = "$(Build.ArtifactStagingDirectory)\k6-Performance-HTML-Report.zip"
 
-        Compress-Archive -Path $reportPath -DestinationPath $zipPath -Force
+        if (Test-Path $reportPath) {
+          New-Item -ItemType Directory -Force -Path "$(Build.ArtifactStagingDirectory)" | Out-Null
 
-        Write-Host "Created downloadable report ZIP: $zipPath"
+          Compress-Archive -Path $reportPath -DestinationPath $zipPath -Force
 
-  # 9. Publish ZIP for download
+          if (Test-Path $zipPath) {
+            Write-Host "##vso[task.setvariable variable=K6HtmlZipCreated]true"
+            Write-Host "Created downloadable report ZIP: $zipPath"
+          }
+          else {
+            Write-Host "##vso[task.logissue type=warning]k6 report ZIP was not created."
+            Write-Host "##vso[task.setvariable variable=K6HtmlZipCreated]false"
+          }
+        }
+        else {
+          Write-Host "##vso[task.logissue type=warning]k6 HTML report not found: $reportPath"
+          Write-Host "##vso[task.setvariable variable=K6HtmlZipCreated]false"
+        }
+
+  # 9. Publish ZIP for download, even if k6 thresholds failed
   - task: PublishPipelineArtifact@1
     displayName: 'Publish k6 Performance Report ZIP'
-    condition: and(always(), eq(variables['K6HtmlReportCreated'], 'true'))
+    condition: and(always(), eq(variables['K6HtmlZipCreated'], 'true'))
     inputs:
       targetPath: '$(Build.ArtifactStagingDirectory)\k6-Performance-HTML-Report.zip'
       artifact: 'k6-Performance-HTML-Report'
