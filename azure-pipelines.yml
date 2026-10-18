@@ -538,11 +538,27 @@ steps:
           Write-Host "##vso[task.setvariable variable=K6HtmlReportCreated]false"
         }
 
-  # 8. Publish k6 HTML report
-  - task: PublishPipelineArtifact@1
-    displayName: 'Publish k6 HTML Performance Report'
+
+  # 8. Create downloadable ZIP containing the k6 HTML report
+  - task: PowerShell@2
+    displayName: 'Create k6 HTML Report ZIP'
     condition: and(always(), eq(variables['K6HtmlReportCreated'], 'true'))
     inputs:
-      targetPath: '$(Build.SourcesDirectory)\performance\dist\performance-report.html'
+      targetType: inline
+      script: |
+        $reportPath = "$(Build.SourcesDirectory)\performance\dist\performance-report.html"
+        $zipPath = "$(Build.ArtifactStagingDirectory)\k6-Performance-HTML-Report.zip"
+
+        Compress-Archive -Path $reportPath -DestinationPath $zipPath -Force
+
+        Write-Host "Created downloadable report ZIP: $zipPath"
+
+  # 9. Publish ZIP for download
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish k6 Performance Report ZIP'
+    condition: and(always(), eq(variables['K6HtmlReportCreated'], 'true'))
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)\k6-Performance-HTML-Report.zip'
       artifact: 'k6-Performance-HTML-Report'
       publishLocation: pipeline
+
