@@ -512,11 +512,19 @@ steps:
         <div style="font-size:14px;font-weight:bold;color:#334155;">TestSummary.txt</div>
         <div style="font-size:12px;color:#64748b;margin-top:5px;">Text version of the execution summary</div>
         </td></tr>
+        <tr>
+        <td height="10" style="height:10px;font-size:1px;">&nbsp;</td>
+        </tr>
+        <tr>
+        <td style="padding:12px;border:1px solid #e2e8f0;border-radius:8px;">
+        <div style="font-size:14px;font-weight:bold;color:#1d4ed8;">k6-Performance-HTML-Report.zip</div>
+        <div style="font-size:12px;color:#64748b;margin-top:5px;">Downloadable HTML performance test report</div>
+        </td>
+        </tr>
         </table>
         <div style="font-size:12px;color:#64748b;line-height:1.6;margin-top:14px;">The reports are attached to this email. You can also download them from the Artifacts section of the Azure DevOps pipeline run.</div>
         </td>
         </tr>
-
         <tr>
         <td style="background:#172554;padding:20px 30px;text-align:center;color:#cbd5e1;">
         <div style="font-size:13px;font-weight:bold;color:#ffffff;">Playwright Automation Framework</div>
