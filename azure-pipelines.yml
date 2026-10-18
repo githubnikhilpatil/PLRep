@@ -504,3 +504,45 @@ steps:
       GMAIL_APP_PASSWORD: $(GMAIL_APP_PASSWORD)
       GMAIL_TO: $(GMAIL_TO)
 
+
+
+  # 6. Run k6 performance test and generate HTML report
+  - task: PowerShell@2
+    displayName: 'Run k6 Performance Test'
+    inputs:
+      targetType: inline
+      script: |
+        npm run performance
+
+        if ($LASTEXITCODE -ne 0) {
+          throw "k6 performance test failed."
+        }
+      workingDirectory: '$(Build.SourcesDirectory)'
+    continueOnError: true
+
+  # 7. Verify k6 HTML report
+  - task: PowerShell@2
+    displayName: 'Check k6 HTML Report'
+    condition: always()
+    inputs:
+      targetType: inline
+      script: |
+        $reportPath = "$(Build.SourcesDirectory)\performance\dist\performance-report.html"
+
+        if (Test-Path $reportPath) {
+          Write-Host "k6 HTML report found."
+          Write-Host "##vso[task.setvariable variable=K6HtmlReportCreated]true"
+        }
+        else {
+          Write-Host "##vso[task.logissue type=warning]k6 HTML report was not generated."
+          Write-Host "##vso[task.setvariable variable=K6HtmlReportCreated]false"
+        }
+
+  # 8. Publish k6 HTML report
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish k6 HTML Performance Report'
+    condition: and(always(), eq(variables['K6HtmlReportCreated'], 'true'))
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)\performance\dist\performance-report.html'
+      artifact: 'k6-Performance-HTML-Report'
+      publishLocation: pipeline
