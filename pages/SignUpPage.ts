@@ -25,7 +25,7 @@ export class SignUpPage {
         const NewUser= GenericUtilityHelper.generateEmail();
         await this.email.fill(NewUser);
         await this.termsOfUse.click();
-       // await this.page.pause();
+        await this.page.pause();
         //await this.recaptchaCheckbox.click();
       //  await this.page.waitForTimeout(10000);
         await this.signUpButton.click();
