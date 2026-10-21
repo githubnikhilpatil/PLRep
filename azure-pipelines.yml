@@ -38,7 +38,7 @@ parameters:
       - Orders
 
 schedules:
-  - cron: "0 */2 * * *"
+  - cron: "0 */6 * * *"
     displayName: "Run Every Hour"
     branches:
       include:
